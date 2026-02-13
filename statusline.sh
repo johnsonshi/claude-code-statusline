@@ -118,5 +118,5 @@ else
     echo "📁 ${DIR}"
 fi
 # Line 2: context, model, cost, api time, wall time, session
-echo "🧠 ${USED_K}k / ${CTX_K}k (${PCT_FMT}%)   🤖 ${MODEL_ID}   💰 ${COST_FMT}   ⏱️ ${API_MINS}m ${API_SECS}s   🕐 ${WALL_MINS}m ${WALL_SECS}s   📋 ${SESSION_ID}"
+echo "🧠 ${USED_K}k / ${CTX_K}k (${PCT_FMT}%)   🤖 ${MODEL_ID}   💰 ${COST_FMT}   ⚙️ ${API_MINS}m ${API_SECS}s   📅 ${WALL_MINS}m ${WALL_SECS}s   📋 ${SESSION_ID}"
 
