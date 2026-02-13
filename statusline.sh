@@ -26,6 +26,19 @@ API_SEC=$((API_DURATION_MS / 1000))
 API_MINS=$((API_SEC / 60))
 API_SECS=$((API_SEC % 60))
 
+# Wall time - track session start time in a file keyed by session ID
+SESSION_ID=$(echo "$input" | jq -r '.session_id // "unknown"')
+WALL_TIME_DIR="/tmp/statusline-wall-time"
+mkdir -p "$WALL_TIME_DIR"
+WALL_TIME_FILE="${WALL_TIME_DIR}/${SESSION_ID}"
+if [ ! -f "$WALL_TIME_FILE" ]; then
+    date +%s > "$WALL_TIME_FILE"
+fi
+SESSION_START=$(cat "$WALL_TIME_FILE")
+WALL_SEC=$(($(date +%s) - SESSION_START))
+WALL_MINS=$((WALL_SEC / 60))
+WALL_SECS=$((WALL_SEC % 60))
+
 # Context window - use used_percentage to derive actual current context used
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
@@ -38,8 +51,7 @@ USED_K=$(awk "BEGIN {printf \"%.1f\", $USED / 1000}")
 CTX_K=$(awk "BEGIN {printf \"%.1f\", $CONTEXT_SIZE / 1000}")
 PCT_FMT=$(awk "BEGIN {printf \"%.1f\", $PCT}")
 
-# Session
-SESSION_ID=$(echo "$input" | jq -r '.session_id // "unknown"')
+# Session (already extracted above for wall time tracking)
 
 # Cache git branch + remote (runs frequently, git can be slow in large repos)
 CACHE_FILE="/tmp/statusline-git-cache"
@@ -105,6 +117,6 @@ if [ -n "$GIT_PART" ]; then
 else
     echo "📁 ${DIR}"
 fi
-# Line 2: context, model, cost, api time, session
-echo "🧠 ${USED_K}k / ${CTX_K}k (${PCT_FMT}%)   🤖 ${MODEL_ID}   💰 ${COST_FMT}   ⏱️ ${API_MINS}m ${API_SECS}s   📋 ${SESSION_ID}"
+# Line 2: context, model, cost, api time, wall time, session
+echo "🧠 ${USED_K}k / ${CTX_K}k (${PCT_FMT}%)   🤖 ${MODEL_ID}   💰 ${COST_FMT}   ⏱️ ${API_MINS}m ${API_SECS}s   🕐 ${WALL_MINS}m ${WALL_SECS}s   📋 ${SESSION_ID}"
 
